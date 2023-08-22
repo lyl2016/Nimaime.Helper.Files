@@ -38,6 +38,15 @@ namespace Nimaime.Helper.Files
 					{
 						return Encoding.BigEndianUnicode; // UTF-16BE
 					}
+					else if (buffer[0] == 0x1B && buffer[1] == 0x24 && buffer[2] == 0x40)
+					{
+						return Encoding.GetEncoding("Shift_JIS"); // Shift JIS
+					}
+					else if (buffer[0] >= 0xB0 && buffer[0] <= 0xF7 && buffer[1] >= 0xA1 && buffer[1] <= 0xFE)
+					{
+						return Encoding.GetEncoding("GB2312"); // GB2312
+					}
+
 				}
 			}
 
