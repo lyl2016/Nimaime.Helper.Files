@@ -13,60 +13,64 @@ namespace Nimaime.Helper.Files
 	public static class CSVHelper
 	{
 		/// <summary>
-		/// 读取CSV文件生成DataTable
+		/// CSV转换为DataTable
 		/// </summary>
-		/// <param name="fileName">文件名</param>
+		/// <param name="fileName">CSV文件</param>
 		/// <returns></returns>
 		public static DataTable CSV2DataTable(string fileName)
+		{
+			return CSV2DataTable(fileName, CommonFileHelper.GetFileEncoding(fileName));
+		}
+
+		/// <summary>
+		/// CSV转换为DataTable
+		/// </summary>
+		/// <param name="fileName">CSV文件</param>
+		/// <param name="encoding">指定编码</param>
+		/// <returns></returns>
+		public static DataTable CSV2DataTable(string fileName, Encoding encoding)
 		{
 			if (!File.Exists(fileName))
 			{
 				return null;
 			}
-			DataTable dt = new DataTable();
-			FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read);
-			StreamReader sr = new StreamReader(fs, Encoding.GetEncoding("GB2312"));
-			//记录每次读取的一行记录
-			string strLine;
-			//记录每行记录中的各字段内容
-			string[] aryLine;
-			//标示列数
-			int columnCount = 0;
-			//标示是否是读取的第一行
-			bool IsFirst = true;
 
-			string pattern = ",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)"; // 匹配 CSV 文件中的内容
-
-			//逐行读取CSV中的数据
-			while ((strLine = sr.ReadLine()) != null)
+			DataTable dataTable = new DataTable();
+			FileStream fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read);
+			StreamReader streamReader = new StreamReader(fileStream, encoding);
+			int num = 0;
+			bool flag = true;
+			string pattern = ",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)";
+			string text;
+			while ((text = streamReader.ReadLine()) != null)
 			{
-				aryLine = strLine.Split(',');
-				if (IsFirst == true)
+				string[] array = text.Split(new char[1] { ',' });
+				if (flag)
 				{
-					IsFirst = false;
-					columnCount = aryLine.Length;
-					//创建列
-					for (int i = 0; i < columnCount; i++)
+					flag = false;
+					num = array.Length;
+					for (int i = 0; i < num; i++)
 					{
-						DataColumn dc = new DataColumn(aryLine[i]);
-						dt.Columns.Add(dc);
+						DataColumn column = new DataColumn(array[i].Replace("\"", ""));
+						dataTable.Columns.Add(column);
 					}
 				}
 				else
 				{
-					string[] rows = Regex.Split(strLine, pattern);//Use Regex To Fetch The Data In CSV Cells
-					DataRow dr = dt.NewRow();
-					for (int j = 0; j < columnCount; j++)
+					string[] array2 = Regex.Split(text, pattern);
+					DataRow dataRow = dataTable.NewRow();
+					for (int j = 0; j < num; j++)
 					{
-						dr[j] = rows[j].Replace("\"", "");
+						dataRow[j] = array2[j].Replace("\"", "");
 					}
-					dt.Rows.Add(dr);
+
+					dataTable.Rows.Add(dataRow);
 				}
 			}
 
-			sr.Close();
-			fs.Close();
-			return dt;
+			streamReader.Close();
+			fileStream.Close();
+			return dataTable;
 		}
 
 		/// <summary>
