@@ -85,7 +85,7 @@ namespace Nimaime.Helper.Files
 				Directory.CreateDirectory(Path.GetDirectoryName(AbosultedFilePath));
 			}
 			FileStream fs = new FileStream(AbosultedFilePath, FileMode.Create, FileAccess.Write);
-			StreamWriter sw = new StreamWriter(fs, Encoding.GetEncoding("GB2312"));
+			StreamWriter sw = new StreamWriter(fs, Encoding.UTF8);
 			//Tabel header
 			string line = "";
 			for (int i = 0; i < dt.Columns.Count; i++)
